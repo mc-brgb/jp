@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Flashcards</title>
+    <style>
+        :root {
+            --primary: #f8e1ee;
+            --secondary: #d1e5f7;
+            --accent: #b8e0d2;
+            --text: #5d576b;
+            --light: #f9f9f9;
+            --wrong: #ffd6d6;
+            --correct: #d4edda;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 300;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .flashcard {
+            width: 100%;
+            background-color: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+        
+        .flashcard:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-container {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            background-color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .hiragana {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            min-height: 3rem;
+        }
+        
+        .timer-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .timer {
+            height: 6px;
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
+            border-radius: 3px;
+            transition: width 0.2s linear;
+        }
+        
+        .time-text {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 0.3rem;
+        }
+        
+        .input-container {
+            margin-bottom: 1.5rem;
+            width: 100%;
+            position: relative;
+        }
+        
+        .romaji-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            z-index: 2;
+            background: transparent;
+        }
+        
+        .hiragana-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            background: white;
+            pointer-events: none;
+        }
+        
+        .romaji-input:focus {
+            outline: none;
+            opacity: 0.1;
+        }
+        
+        .romaji-input:focus + .hiragana-input {
+            border-color: var(--accent);
+        }
+        
+        .hiragana-input.correct {
+            background-color: var(--correct);
+            border-color: #c3e6cb;
+        }
+        
+        .hiragana-input.wrong {
+            background-color: var(--wrong);
+            border-color: #f5c6cb;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        input.correct {
+            background-color: var(--correct);
+            border-color: #c3e6cb;
+        }
+        
+        input.wrong {
+            background-color: var(--wrong);
+            border-color: #f5c6cb;
+        }
+        
+        .btn {
+            background-color: var(--accent);
+            color: var(--text);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .feedback {
+            margin-top: 1rem;
+            text-align: center;
+            min-height: 1.5rem;
+            font-weight: 500;
+        }
+        
+        .score {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .modal h2 {
+            margin-bottom: 1rem;
+        }
+        
+        .word-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .word-item {
+            background-color: var(--primary);
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        /* Styles for hiragana mapping modal */
+        .mapping-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .mapping-table th, .mapping-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .mapping-table th {
+            background-color: var(--secondary);
+        }
+        
+        .mapping-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .mapping-modal-content {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .mapping-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .mapping-section h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.3rem;
+        }
+        
+        .info-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            color: var(--text);
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .info-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Japanese Flashcards</h1>
+        <p>Guess the Japanese word (romanji) for each image within 10 seconds!</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Type romanji (like "ka" or "neko") and see it convert to hiragana (か or ねこ)</p>
+    </header>
+    
+    <div class="container">
+        <div class="flashcard">
+            <div class="image-container">
+                <img id="flashcard-image" src="/api/placeholder/400/300" alt="Flashcard Image">
+            </div>
+            
+            <div class="card-body">
+                <div class="hiragana" id="hiragana-text"></div>
+                <div class="kanji" id="kanji-text" style="display: none; font-size: 2.5rem; margin-bottom: 0.5rem;"></div>
+                
+                <div class="timer-container">
+                    <div class="timer">
+                        <div class="timer-bar" id="timer-bar"></div>
+                    </div>
+                    <div class="time-text"><span id="seconds">10</span> seconds</div>
+                </div>
+                
+                <div class="input-container">
+                    <input type="text" id="answer-input" placeholder="Type the romanji here (e.g., neko, taiyou)..." autocomplete="off">
+                </div>
+                
+                <div class="controls">
+                    <button class="btn" id="check-btn">Check</button>
+                    <button class="btn" id="next-btn">Next</button>
+                </div>
+                
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+        
+        <div class="score">
+            Correct: <span id="correct-count">0</span> | 
+            Attempted: <span id="total-count">0</span>
+            <button class="btn" id="show-words-btn" style="margin-left: 1rem">Show All Words</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="words-modal">
+        <div class="modal-content">
+            <h2>All Flashcard Words</h2>
+            <div class="word-list" id="word-list"></div>
+            <button class="btn" id="close-modal-btn">Close</button>
+        </div>
+    </div>
+    
+    <!-- Hiragana Mapping Modal -->
+    <div class="modal" id="mapping-modal">
+        <div class="modal-content mapping-modal-content">
+            <h2>Romanji to Hiragana Mapping</h2>
+            
+            <div class="mapping-section">
+                <h3>Basic Vowels</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>a</td><td>あ</td></tr>
+                    <tr><td>i</td><td>い</td></tr>
+                    <tr><td>u</td><td>う</td></tr>
+                    <tr><td>e</td><td>え</td></tr>
+                    <tr><td>o</td><td>お</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>K Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>ka</td><td>か</td></tr>
+                    <tr><td>ki</td><td>き</td></tr>
+                    <tr><td>ku</td><td>く</td></tr>
+                    <tr><td>ke</td><td>け</td></tr>
+                    <tr><td>ko</td><td>こ</td></tr>
+                    <tr><td>kya</td><td>きゃ</td></tr>
+                    <tr><td>kyu</td><td>きゅ</td></tr>
+                    <tr><td>kyo</td><td>きょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>S Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>sa</td><td>さ</td></tr>
+                    <tr><td>shi</td><td>し</td></tr>
+                    <tr><td>su</td><td>す</td></tr>
+                    <tr><td>se</td><td>せ</td></tr>
+                    <tr><td>so</td><td>そ</td></tr>
+                    <tr><td>sha</td><td>しゃ</td></tr>
+                    <tr><td>shu</td><td>しゅ</td></tr>
+                    <tr><td>sho</td><td>しょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>T Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>ta</td><td>た</td></tr>
+                    <tr><td>chi</td><td>ち</td></tr>
+                    <tr><td>tsu</td><td>つ</td></tr>
+                    <tr><td>te</td><td>て</td></tr>
+                    <tr><td>to</td><td>と</td></tr>
+                    <tr><td>cha</td><td>ちゃ</td></tr>
+                    <tr><td>chu</td><td>ちゅ</td></tr>
+                    <tr><td>cho</td><td>ちょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>N Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>na</td><td>な</td></tr>
+                    <tr><td>ni</td><td>に</td></tr>
+                    <tr><td>nu</td><td>ぬ</td></tr>
+                    <tr><td>ne</td><td>ね</td></tr>
+                    <tr><td>no</td><td>の</td></tr>
+                    <tr><td>nya</td><td>にゃ</td></tr>
+                    <tr><td>nyu</td><td>にゅ</td></tr>
+                    <tr><td>nyo</td><td>にょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>H Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>ha</td><td>は</td></tr>
+                    <tr><td>hi</td><td>ひ</td></tr>
+                    <tr><td>fu</td><td>ふ</td></tr>
+                    <tr><td>he</td><td>へ</td></tr>
+                    <tr><td>ho</td><td>ほ</td></tr>
+                    <tr><td>hya</td><td>ひゃ</td></tr>
+                    <tr><td>hyu</td><td>ひゅ</td></tr>
+                    <tr><td>hyo</td><td>ひょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>M Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>ma</td><td>ま</td></tr>
+                    <tr><td>mi</td><td>み</td></tr>
+                    <tr><td>mu</td><td>む</td></tr>
+                    <tr><td>me</td><td>め</td></tr>
+                    <tr><td>mo</td><td>も</td></tr>
+                    <tr><td>mya</td><td>みゃ</td></tr>
+                    <tr><td>myu</td><td>みゅ</td></tr>
+                    <tr><td>myo</td><td>みょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>Y Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>ya</td><td>や</td></tr>
+                    <tr><td>yu</td><td>ゆ</td></tr>
+                    <tr><td>yo</td><td>よ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>R Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>ra</td><td>ら</td></tr>
+                    <tr><td>ri</td><td>り</td></tr>
+                    <tr><td>ru</td><td>る</td></tr>
+                    <tr><td>re</td><td>れ</td></tr>
+                    <tr><td>ro</td><td>ろ</td></tr>
+                    <tr><td>rya</td><td>りゃ</td></tr>
+                    <tr><td>ryu</td><td>りゅ</td></tr>
+                    <tr><td>ryo</td><td>りょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>W Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>wa</td><td>わ</td></tr>
+                    <tr><td>wo</td><td>を</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>G Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>ga</td><td>が</td></tr>
+                    <tr><td>gi</td><td>ぎ</td></tr>
+                    <tr><td>gu</td><td>ぐ</td></tr>
+                    <tr><td>ge</td><td>げ</td></tr>
+                    <tr><td>go</td><td>ご</td></tr>
+                    <tr><td>gya</td><td>ぎゃ</td></tr>
+                    <tr><td>gyu</td><td>ぎゅ</td></tr>
+                    <tr><td>gyo</td><td>ぎょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>Z Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>za</td><td>ざ</td></tr>
+                    <tr><td>ji</td><td>じ</td></tr>
+                    <tr><td>zu</td><td>ず</td></tr>
+                    <tr><td>ze</td><td>ぜ</td></tr>
+                    <tr><td>zo</td><td>ぞ</td></tr>
+                    <tr><td>ja</td><td>じゃ</td></tr>
+                    <tr><td>ju</td><td>じゅ</td></tr>
+                    <tr><td>jo</td><td>じょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>D Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>da</td><td>だ</td></tr>
+                    <tr><td>di</td><td>ぢ</td></tr>
+                    <tr><td>du</td><td>づ</td></tr>
+                    <tr><td>de</td><td>で</td></tr>
+                    <tr><td>do</td><td>ど</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>B Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>ba</td><td>ば</td></tr>
+                    <tr><td>bi</td><td>び</td></tr>
+                    <tr><td>bu</td><td>ぶ</td></tr>
+                    <tr><td>be</td><td>べ</td></tr>
+                    <tr><td>bo</td><td>ぼ</td></tr>
+                    <tr><td>bya</td><td>びゃ</td></tr>
+                    <tr><td>byu</td><td>びゅ</td></tr>
+                    <tr><td>byo</td><td>びょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>P Group</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                    </tr>
+                    <tr><td>pa</td><td>ぱ</td></tr>
+                    <tr><td>pi</td><td>ぴ</td></tr>
+                    <tr><td>pu</td><td>ぷ</td></tr>
+                    <tr><td>pe</td><td>ぺ</td></tr>
+                    <tr><td>po</td><td>ぽ</td></tr>
+                    <tr><td>pya</td><td>ぴゃ</td></tr>
+                    <tr><td>pyu</td><td>ぴゅ</td></tr>
+                    <tr><td>pyo</td><td>ぴょ</td></tr>
+                </table>
+            </div>
+            
+            <div class="mapping-section">
+                <h3>Special Characters</h3>
+                <table class="mapping-table">
+                    <tr>
+                        <th>Romanji</th>
+                        <th>Hiragana</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr><td>n (end of word or before consonant)</td><td>ん</td><td>Small n</td></tr>
+                    <tr><td>Double consonants (kk, tt, pp, etc.)</td><td>っ</td><td>Small tsu</td></tr>
+                </table>
+            </div>
+            
+            <button class="btn" id="close-mapping-btn">Close</button>
+        </div>
+    </div>
+    
+    <!-- Info Button -->
+    <button class="info-button" id="info-button">?</button>
+    
+    <script>
+        // Flashcard data - image URL, hiragana, and romanji
+        const flashcards = [
+            {
+                image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300",
+                kanji: "猫",
+                furigana: "ねこ",
+                romanji: "neko"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?q=80&w=3870&auto=format&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dfit=crop&w=400&h=300",
+                kanji: "犬",
+                furigana: "いぬ",
+                romanji: "inu"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300",
+                kanji: "本",
+                furigana: "ほん",
+                romanji: "hon"
+            },
+            {
+                image: "https://plus.unsplash.com/premium_photo-1729537378649-066872523a70?w=900&auto=format&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTI1fHx3YXRlcnxlbnwwfHwwfHx8MA%3D%3D&fit=crop&w=400&h=300",
+                kanji: "水",
+                furigana: "みず",
+                romanji: "mizu"
+            },
+            {
+                image: "https://images.unsplash.com/reserve/bOvf94dPRxWu0u3QsPjF_tree.jpg?q=80&w=3876&auto=format&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&fit=crop&w=400&h=300",
+                kanji: "木",
+                furigana: "き",
+                romanji: "ki"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1575881875475-31023242e3f9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300",
+                kanji: "太陽",
+                furigana: "たいよう",
+                romanji: "taiyou"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1479090793912-eb9929f4fdb2?q=80&w=2203&auto=format&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&fit=crop&w=400&h=300",
+                kanji: "月",
+                furigana: "つき",
+                romanji: "tsuki"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300",
+                kanji: "山",
+                furigana: "やま",
+                romanji: "yama"
+            }
+        ];
+        
+        // DOM elements
+        const flashcardImage = document.getElementById('flashcard-image');
+        const hiraganaText = document.getElementById('hiragana-text');
+        const timerBar = document.getElementById('timer-bar');
+        const secondsDisplay = document.getElementById('seconds');
+        const answerInput = document.getElementById('answer-input');
+        const checkBtn = document.getElementById('check-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const feedback = document.getElementById('feedback');
+        const correctCount = document.getElementById('correct-count');
+        const totalCount = document.getElementById('total-count');
+        const showWordsBtn = document.getElementById('show-words-btn');
+        const wordsModal = document.getElementById('words-modal');
+        const wordList = document.getElementById('word-list');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        
+        // Game state
+        let currentCardIndex = 0;
+        let timeLeft = 10;
+        let timer;
+        let stats = {
+            correct: 0,
+            total: 0
+        };
+        let canAnswer = true;
+        let romanjiBuffer = '';
+        
+        // Initialize the game
+        function initGame() {
+            // Shuffle the cards
+            shuffleArray(flashcards);
+            
+            // Show the first card
+            showCard(currentCardIndex);
+            
+            // Create word list for modal
+            createWordList();
+        }
+        
+        // Fisher-Yates shuffle algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        // Show a card
+        function showCard(index) {
+            const card = flashcards[index];
+            
+            // Update UI
+            flashcardImage.src = card.image;
+            hiraganaText.textContent = "？？？";
+            document.getElementById('kanji-text').style.display = 'none';
+            document.getElementById('kanji-text').textContent = '';
+            answerInput.value = "";
+            romanjiBuffer = "";
+            answerInput.classList.remove('correct', 'wrong');
+            answerInput.focus();
+            feedback.textContent = "";
+            canAnswer = true;
+            
+            // Reset and start timer
+            resetTimer();
+            startTimer();
+        }
+        
+        // Start the timer
+        function startTimer() {
+            timeLeft = 10;
+            secondsDisplay.textContent = timeLeft;
+            timerBar.style.width = "100%";
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                secondsDisplay.textContent = timeLeft;
+                timerBar.style.width = `${(timeLeft / 10) * 100}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timeUp();
+                }
+            }, 1000);
+        }
+        
+        // Reset the timer
+        function resetTimer() {
+            clearInterval(timer);
+            timeLeft = 10;
+            secondsDisplay.textContent = timeLeft;
+            timerBar.style.width = "100%";
+        }
+        
+        // Time's up function
+        function timeUp() {
+            if (!canAnswer) return;
+            
+            canAnswer = false;
+            const currentCard = flashcards[currentCardIndex];
+            hiraganaText.textContent = currentCard.furigana;
+            document.getElementById('kanji-text').textContent = currentCard.kanji;
+            document.getElementById('kanji-text').style.display = 'block';
+            answerInput.classList.add('wrong');
+            feedback.textContent = `Time's up! The answer was "${currentCard.romanji}"`;
+            stats.total++;
+            updateStats();
+        }
+        
+        // Check the answer
+        function checkAnswer() {
+            if (!canAnswer) return;
+            
+            canAnswer = false;
+            clearInterval(timer);
+            
+            const currentCard = flashcards[currentCardIndex];
+            const userInput = romanjiBuffer.trim().toLowerCase();
+            
+            // Show the furigana and kanji
+            hiraganaText.textContent = currentCard.furigana;
+            document.getElementById('kanji-text').textContent = currentCard.kanji;
+            document.getElementById('kanji-text').style.display = 'block';
+            
+            // Check if the answer is correct
+            if (userInput === currentCard.romanji) {
+                answerInput.classList.add('correct');
+                feedback.textContent = "Correct! 👏";
+                stats.correct++;
+            } else {
+                answerInput.classList.add('wrong');
+                feedback.textContent = `Wrong! The correct answer is "${currentCard.romanji}"`;
+            }
+            
+            stats.total++;
+            updateStats();
+        }
+        
+        // Next card
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+            showCard(currentCardIndex);
+        }
+        
+        // Update stats display
+        function updateStats() {
+            correctCount.textContent = stats.correct;
+            totalCount.textContent = stats.total;
+        }
+        
+        // Create word list for modal
+        function createWordList() {
+            wordList.innerHTML = "";
+            
+            flashcards.forEach(card => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                
+                const kanjiElem = document.createElement('div');
+                kanjiElem.textContent = card.kanji;
+                kanjiElem.style.fontSize = '1.2rem';
+                
+                const furiganaElem = document.createElement('div');
+                furiganaElem.textContent = card.furigana;
+                furiganaElem.style.fontSize = '0.9rem';
+                
+                const romanjiElem = document.createElement('div');
+                romanjiElem.textContent = card.romanji;
+                
+                wordItem.appendChild(kanjiElem);
+                wordItem.appendChild(furiganaElem);
+                wordItem.appendChild(romanjiElem);
+                wordList.appendChild(wordItem);
+            });
+        }
+        
+        // Map romanji to hiragana - Enhanced version from the first file
+        const hiraganaMap = {
+            // Base vowels
+            "a": "あ", "i": "い", "u": "う", "e": "え", "o": "お",
+            
+            // K group (ka, ki, ku, ke, ko)
+            "ka": "か", "ki": "き", "ku": "く", "ke": "け", "ko": "こ",
+            "kya": "きゃ", "kyu": "きゅ", "kyo": "きょ",
+            
+            // S group (sa, shi, su, se, so)
+            "sa": "さ", "shi": "し", "su": "す", "se": "せ", "so": "そ",
+            "sha": "しゃ", "shu": "しゅ", "sho": "しょ",
+            
+            // T group (ta, chi, tsu, te, to)
+            "ta": "た", "chi": "ち", "tsu": "つ", "te": "て", "to": "と",
+            "cha": "ちゃ", "chu": "ちゅ", "cho": "ちょ",
+            
+            // N group (na, ni, nu, ne, no)
+            "na": "な", "ni": "に", "nu": "ぬ", "ne": "ね", "no": "の",
+            "nya": "にゃ", "nyu": "にゅ", "nyo": "にょ",
+            
+            // H group (ha, hi, fu, he, ho)
+            "ha": "は", "hi": "ひ", "fu": "ふ", "he": "へ", "ho": "ほ",
+            "hya": "ひゃ", "hyu": "ひゅ", "hyo": "ひょ",
+            
+            // M group (ma, mi, mu, me, mo)
+            "ma": "ま", "mi": "み", "mu": "む", "me": "め", "mo": "も",
+            "mya": "みゃ", "myu": "みゅ", "myo": "みょ",
+            
+            // Y group (ya, yu, yo)
+            "ya": "や", "yu": "ゆ", "yo": "よ",
+            
+            // R group (ra, ri, ru, re, ro)
+            "ra": "ら", "ri": "り", "ru": "る", "re": "れ", "ro": "ろ",
+            "rya": "りゃ", "ryu": "りゅ", "ryo": "りょ",
+            
+            // W group (wa, wo)
+            "wa": "わ", "wo": "を",
+            
+            // G group (ga, gi, gu, ge, go)
+            "ga": "が", "gi": "ぎ", "gu": "ぐ", "ge": "げ", "go": "ご",
+            "gya": "ぎゃ", "gyu": "ぎゅ", "gyo": "ぎょ",
+            
+            // Z group (za, ji, zu, ze, zo)
+            "za": "ざ", "ji": "じ", "zu": "ず", "ze": "ぜ", "zo": "ぞ",
+            "ja": "じゃ", "ju": "じゅ", "jo": "じょ",
+            
+            // D group (da, di, du, de, do)
+            "da": "だ", "di": "ぢ", "du": "づ", "de": "で", "do": "ど",
+            
+            // B group (ba, bi, bu, be, bo)
+            "ba": "ば", "bi": "び", "bu": "ぶ", "be": "べ", "bo": "ぼ",
+            "bya": "びゃ", "byu": "びゅ", "byo": "びょ",
+            
+            // P group (pa, pi, pu, pe, po)
+            "pa": "ぱ", "pi": "ぴ", "pu": "ぷ", "pe": "ぺ", "po": "ぽ",
+            "pya": "ぴゃ", "pyu": "ぴゅ", "pyo": "ぴょ",
+            
+            // Special characters
+            "n": "ん"
+        };
+        
+        // Function to convert romanji to hiragana - Enhanced version from the first file
+        function toHiragana(text) {
+            text = text.toLowerCase();
+            let result = '';
+            let i = 0;
+            
+            // Process input
+            while (i < text.length) {
+                // Check for double consonants
+                if (i + 1 < text.length && 
+                    text[i] === text[i + 1] && 
+                    'bcdfghjklmnpqrstvwxyz'.includes(text[i])) {
+                    result += 'っ'; // Small tsu for double consonant
+                    i++; // Skip the first of the doubled consonants
+                    continue;
+                }
+                
+                // Try to match 3 characters (e.g., "kya", "shu")
+                if (i + 2 < text.length) {
+                    const threeChars = text.substr(i, 3);
+                    if (hiraganaMap[threeChars]) {
+                        result += hiraganaMap[threeChars];
+                        i += 3;
+                        continue;
+                    }
+                }
+                
+                // Try to match 2 characters (e.g., "ka", "no")
+                if (i + 1 < text.length) {
+                    const twoChars = text.substr(i, 2);
+                    if (hiraganaMap[twoChars]) {
+                        result += hiraganaMap[twoChars];
+                        i += 2;
+                        continue;
+                    }
+                }
+                
+                // Special handling for 'n'
+                if (text[i] === 'n') {
+                    // 'n' at the end or followed by consonant (except 'y') becomes 'ん'
+                    if (i === text.length - 1 || 
+                        !'aeiouy'.includes(text[i + 1])) {
+                        result += 'ん';
+                        i++;
+                        continue;
+                    }
+                }
+                
+                // Single character mapping
+                if (hiraganaMap[text[i]]) {
+                    result += hiraganaMap[text[i]];
+                } else {
+                    // Keep characters that don't map to hiragana
+                    result += text[i];
+                }
+                
+                i++;
+            }
+            
+            return result;
+        }
+        
+        // Event listeners with enhanced conversion
+        answerInput.addEventListener('keydown', function(e) {
+            // Handle backspace key - delete last romanji character
+            if (e.key === 'Backspace' && romanjiBuffer.length > 0) {
+                e.preventDefault(); // Prevent default backspace
+                
+                // Delete last character of romanji buffer
+                romanjiBuffer = romanjiBuffer.slice(0, -1);
+                
+                // Convert and update
+                const hiragana = toHiragana(romanjiBuffer);
+                this.value = hiragana;
+            }
+        });
+        
+        answerInput.addEventListener('input', function(e) {
+            // If backspace was handled by keydown, skip
+            if (e.inputType === 'deleteContentBackward') {
+                return;
+            }
+            
+            // Add character to buffer for insert
+            if (e.inputType === 'insertText' && e.data) {
+                romanjiBuffer += e.data;
+            }
+            // For paste or other operations, set buffer to current value
+            else {
+                romanjiBuffer = this.value;
+            }
+            
+            // Convert romanji to hiragana
+            const hiragana = toHiragana(romanjiBuffer);
+            
+            // Update input field if different
+            if (this.value !== hiragana) {
+                this.value = hiragana;
+            }
+        });
+        
+        // Handle paste events
+        answerInput.addEventListener('paste', function(e) {
+            // Let default paste happen then process
+            setTimeout(() => {
+                romanjiBuffer = this.value;
+                const hiragana = toHiragana(romanjiBuffer);
+                this.value = hiragana;
+            }, 0);
+        });
+        
+        checkBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', nextCard);
+        
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && canAnswer) {
+                checkAnswer();
+            }
+        });
+        
+        showWordsBtn.addEventListener('click', () => {
+            wordsModal.style.display = 'flex';
+        });
+        
+        closeModalBtn.addEventListener('click', () => {
+            wordsModal.style.display = 'none';
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === wordsModal) {
+                wordsModal.style.display = 'none';
+            }
+        });
+        
+        // Show hiragana mapping popup
+        const infoButton = document.getElementById('info-button');
+        const mappingModal = document.getElementById('mapping-modal');
+        const closeMappingBtn = document.getElementById('close-mapping-btn');
+        
+        infoButton.addEventListener('click', () => {
+            mappingModal.style.display = 'flex';
+        });
+        
+        closeMappingBtn.addEventListener('click', () => {
+            mappingModal.style.display = 'none';
+        });
+        
+        // Close mapping modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === mappingModal) {
+                mappingModal.style.display = 'none';
+            }
+        });
+        
+        // Initialize the game when page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
